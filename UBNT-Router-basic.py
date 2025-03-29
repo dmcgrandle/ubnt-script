@@ -62,7 +62,7 @@ Interval = 300
 class UBNTRESTAPIBase:
     def __init__ (self, server_address, protocol='https', port=443, version='v1', api_key='none', password='none'):
         self.base_url = '%s://%s:%s' % (protocol, server_address, port)
-        self.api_url = self.base_url + '/proxy/network/integration/' + version + '/sites'
+        self.api_url = self.base_url + '/proxy/network/integration/' + version
 
         self.api_key = api_key
         self.password = password
@@ -110,6 +110,29 @@ class UBNTRESTAPIBase:
         else:
             print (response.text)
             return False
+
+class UBNTClassesAPI (UBNTRESTAPIBase):
+    def __init__ (self, server_address, protocol='https', port=8543, version='v1', api_key='admin', password='admin'):
+        UBNTRESTAPIBase.__init__ (self, server_address, protocol, port, version, api_key, password)
+        # /metric-classes - ??
+        self.resource_url = self.api_url + '/sites'
+
+    def get_all_metric_classes (self):
+        'Get all metric classes'
+        metric_classes_json = self.get_json_from_resource (self.resource_url)
+        return metric_classes_json
+
+    def get_metric_class_by_name (self, name):
+        'Get metric class by its name'
+        # Get all devices
+        metric_classes_json = self.get_all_metric_classes ()
+
+        metric_class_json = None
+        for metric_class in metric_classes_json ['items']:
+            if metric_class ['name'] == name:
+                metric_class_json = metric_class
+                break
+        return metric_class_json
 
 def collect():
     """
